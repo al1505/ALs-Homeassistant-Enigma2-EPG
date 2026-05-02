@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ALs Enigma2 EPG – Receiver konfigurieren",
+        "description": "IP-Adresse des VU+/Dreambox-Receivers mit aktiviertem OpenWebIF.",
+        "data": {
+          "alias": "Name (z.B. 'VU+ Office')",
+          "host": "IP-Adresse / Hostname",
+          "port": "Port (Standard: 80)",
+          "ssl": "HTTPS verwenden",
+          "username": "Benutzername (optional)",
+          "password": "Passwort (optional)",
+          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+        },
+        "data_description": {
+          "alias": "Optionaler Anzeigename für diese Integration (erscheint als Gerätename)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen – IP-Adresse und Port prüfen",
+      "invalid_auth": "Authentifizierung fehlgeschlagen – Benutzername/Passwort prüfen",
+      "timeout": "Timeout – Receiver nicht erreichbar"
+    },
+    "abort": {
+      "already_configured": "Dieser Receiver ist bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Einstellungen anpassen",
+        "data": {
+          "alias": "Name (z.B. 'VU+ Office')",
+          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+        }
+      }
+    }
+  }
+}
