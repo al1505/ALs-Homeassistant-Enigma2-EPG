@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from .coordinator import Enigma2EPGCoordinator
 
 DOMAIN = "als_enigma2_epg"
-PLATFORMS = ["sensor", "binary_sensor", "button"]
+PLATFORMS = ["sensor", "binary_sensor", "button", "camera", "media_player"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

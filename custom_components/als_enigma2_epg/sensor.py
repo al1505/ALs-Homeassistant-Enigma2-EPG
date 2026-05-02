@@ -51,6 +51,9 @@ async def async_setup_entry(
         Enigma2EndTimeSensor(coordinator, entry),
         Enigma2VolumeSensor(coordinator, entry),
         Enigma2LastUpdateSensor(coordinator, entry),
+        Enigma2IPSensor(coordinator, entry),
+        Enigma2GrabURLSensor(coordinator, entry),
+        Enigma2PiconURLSensor(coordinator, entry),
     ])
 
 
@@ -103,8 +106,10 @@ class Enigma2ProgrammeSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         data = self.coordinator.data
-        if not data or data.get("in_standby"):
+        if not data:
             return None
+        if data.get("in_standby"):
+            return "standby"
         return data.get("currservice_name") or None
 
 
@@ -123,8 +128,10 @@ class Enigma2StartTimeSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         data = self.coordinator.data
-        if not data or data.get("in_standby"):
+        if not data:
             return None
+        if data.get("in_standby"):
+            return "standby"
         return data.get("currservice_begin") or None
 
 
@@ -143,8 +150,10 @@ class Enigma2EndTimeSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         data = self.coordinator.data
-        if not data or data.get("in_standby"):
+        if not data:
             return None
+        if data.get("in_standby"):
+            return "standby"
         return data.get("currservice_end") or None
 
 
@@ -187,3 +196,61 @@ class Enigma2LastUpdateSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         return self.coordinator.last_poll_time
+
+
+class Enigma2IPSensor(CoordinatorEntity, SensorEntity):
+    """IP-Adresse des Receivers (diagnostisch)."""
+
+    _attr_icon = "mdi:ip-network"
+    _attr_has_entity_name = True
+    _attr_name = "IP Address"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_ip"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str:
+        return self.coordinator._host
+
+
+class Enigma2GrabURLSensor(CoordinatorEntity, SensorEntity):
+    """Grab-URL fuer TV-Screenshot (diagnostisch)."""
+
+    _attr_icon = "mdi:camera"
+    _attr_has_entity_name = True
+    _attr_name = "Grab URL"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_grab_url"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        data = self.coordinator.data
+        return data.get("grab_url") if data else None
+
+
+class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
+    """Picon-URL des aktuellen Kanals (diagnostisch)."""
+
+    _attr_icon = "mdi:image"
+    _attr_has_entity_name = True
+    _attr_name = "Picon URL"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_picon_url"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        data = self.coordinator.data
+        if not data:
+            return None
+        return data.get("picon_url")
