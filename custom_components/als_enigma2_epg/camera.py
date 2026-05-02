@@ -39,7 +39,7 @@ class Enigma2Camera(CoordinatorEntity, Camera):
         data = self.coordinator.data
         if not data or data.get("in_standby"):
             return None
-        return f"rtsp://localhost:8554/{self.coordinator.go2rtc_name}"
+        return data.get("stream_url")
 
     async def async_camera_image(self, width=None, height=None):
         data = self.coordinator.data
