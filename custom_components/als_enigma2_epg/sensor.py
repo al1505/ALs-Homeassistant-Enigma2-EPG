@@ -13,6 +13,15 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import DOMAIN
 from .coordinator import Enigma2EPGCoordinator
 
+
+def _preview(value: str | None) -> str | None:
+    """Kürzt lange Werte auf 10 Zeichen + Hinweis für das More-Info-Fenster."""
+    if not value:
+        return None
+    if len(value) <= 10:
+        return value
+    return value[:10] + "… (See Details)"
+
 _ATTR_WHITELIST = {
     "currservice_station",
     "currservice_name",
@@ -237,7 +246,7 @@ class Enigma2GrabURLSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         data = self.coordinator.data
-        return data.get("grab_url") if data else None
+        return _preview(data.get("grab_url")) if data else None
 
 
 class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
@@ -257,7 +266,7 @@ class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data:
             return None
-        return data.get("picon_url")
+        return _preview(data.get("picon_url"))
 
 
 class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
@@ -277,7 +286,7 @@ class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data:
             return None
-        return data.get("m3u_url")
+        return _preview(data.get("m3u_url"))
 
 
 class Enigma2RemainingTimeSensor(CoordinatorEntity, SensorEntity):
@@ -331,5 +340,4 @@ class Enigma2DescriptionSensor(CoordinatorEntity, SensorEntity):
         desc = data.get("currservice_fulldescription") or ""
         if not desc:
             return "–"
-        # HA-Sensor-State: max 255 Zeichen
-        return desc[:255] if len(desc) <= 255 else desc[:252] + "…"
+        return _preview(desc)
