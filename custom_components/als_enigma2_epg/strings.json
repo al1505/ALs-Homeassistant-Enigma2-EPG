@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "ALs Enigma2 EPG – Receiver konfigurieren",
+        "title": "ALs Homeassistant Enigma2 EPG – Receiver konfigurieren",
         "description": "IP-Adresse des VU+/Dreambox-Receivers mit aktiviertem OpenWebIF.",
         "data": {
           "alias": "Name (z.B. 'VU+ Office')",
