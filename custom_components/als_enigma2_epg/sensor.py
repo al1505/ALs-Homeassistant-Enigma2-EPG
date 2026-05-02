@@ -14,13 +14,9 @@ from . import DOMAIN
 from .coordinator import Enigma2EPGCoordinator
 
 
-def _preview(value: str | None) -> str | None:
-    """Kürzt lange Werte auf 10 Zeichen + Hinweis für das More-Info-Fenster."""
-    if not value:
-        return None
-    if len(value) <= 10:
-        return value
-    return value[:10] + "… (See Details)"
+def _label(value: str | None) -> str:
+    """Gibt '(See Details)' oder 'not available' zurück – voller Wert kommt ins Attribut."""
+    return "(See Details)" if value else "not available"
 
 _ATTR_WHITELIST = {
     "currservice_station",
@@ -244,9 +240,14 @@ class Enigma2GrabURLSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_info = _device_info(entry)
 
     @property
-    def native_value(self) -> str | None:
+    def native_value(self) -> str:
         data = self.coordinator.data
-        return _preview(data.get("grab_url")) if data else None
+        return _label(data.get("grab_url") if data else None)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        return {"url": data.get("grab_url")} if data else {}
 
 
 class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
@@ -262,11 +263,14 @@ class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_info = _device_info(entry)
 
     @property
-    def native_value(self) -> str | None:
+    def native_value(self) -> str:
         data = self.coordinator.data
-        if not data:
-            return None
-        return _preview(data.get("picon_url"))
+        return _label(data.get("picon_url") if data else None)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        return {"url": data.get("picon_url")} if data else {}
 
 
 class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
@@ -282,11 +286,14 @@ class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_info = _device_info(entry)
 
     @property
-    def native_value(self) -> str | None:
+    def native_value(self) -> str:
         data = self.coordinator.data
-        if not data:
-            return None
-        return _preview(data.get("m3u_url"))
+        return _label(data.get("m3u_url") if data else None)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        return {"url": data.get("m3u_url")} if data else {}
 
 
 class Enigma2RemainingTimeSensor(CoordinatorEntity, SensorEntity):
@@ -338,6 +345,11 @@ class Enigma2DescriptionSensor(CoordinatorEntity, SensorEntity):
         if not data or data.get("in_standby"):
             return None
         desc = data.get("currservice_fulldescription") or ""
-        if not desc:
-            return "–"
-        return _preview(desc)
+        return _label(desc or None)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {"description": data.get("currservice_fulldescription") or ""}
