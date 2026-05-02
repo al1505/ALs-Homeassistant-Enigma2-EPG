@@ -62,9 +62,11 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
         self.last_poll_time = datetime.now(timezone.utc)
         data = self._parse(raw)
 
-        # go2rtc Stream bei jedem Poll aktualisieren (idempotent, sichert Reregistrierung nach go2rtc-Neustart)
+        # go2rtc Stream nur bei Kanalwechsel aktualisieren (YAML-Eintraege nicht ueberschreiben)
+        new_ref    = data.get("currservice_serviceref", "")
         stream_url = data.get("stream_url")
-        if stream_url and not data.get("in_standby"):
+        if stream_url and not data.get("in_standby") and new_ref != self._last_serviceref:
+            self._last_serviceref = new_ref
             await self._update_go2rtc(stream_url)
 
         return data
