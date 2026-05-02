@@ -1,6 +1,8 @@
-# ALs Enigma2 EPG
+# ALs Homeassistant Enigma2 EPG
 
 Home Assistant Custom Integration fuer Enigma2/OpenWebIF Receiver (VU+, Dreambox, u.a.).
+
+[![HACS hinzufuegen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=al1505&repository=als-enigma2-epg&category=integration)
 
 ## Features
 
@@ -8,22 +10,26 @@ Home Assistant Custom Integration fuer Enigma2/OpenWebIF Receiver (VU+, Dreambox
 - Lautstaerke, Standby, Aufnahme-Status, Mute
 - Picon-URL und Grab-URL fuer die ALs Harmony Companion Card
 - Konfigurierbarer Alias-Name und Abrufintervall
-- Refresh-Button und Diagnostics (letzter Abruf)
+- Refresh-Button (Configuration) und Diagnostics (letzter Abruf)
 
 ## Installation via HACS
 
+Auf den Badge oben klicken – oder manuell:
+
 1. HACS -> Custom Repositories -> `https://github.com/al1505/als-enigma2-epg` -> Integration
-2. Integration installieren
-3. HA neu starten
-4. Einstellungen -> Integrationen -> ALs Enigma2 EPG hinzufuegen
+2. Integration installieren und HA neu starten
+3. Einstellungen -> Integrationen -> **ALs Homeassistant Enigma2 EPG** hinzufuegen
 
 ## Konfiguration
 
-- **IP-Adresse / Hostname** des Receivers mit aktiviertem OpenWebIF
-- **Port** (Standard: 80)
-- **Alias** (optionaler Anzeigename)
-- **Benutzername / Passwort** (optional)
-- **Aktualisierungsintervall** (10-300 Sekunden, Standard: 30)
+| Feld | Beschreibung |
+|---|---|
+| IP-Adresse / Hostname | Receiver mit aktiviertem OpenWebIF |
+| Port | Standard: 80 |
+| HTTPS | Optional |
+| Alias | Optionaler Anzeigename |
+| Benutzername / Passwort | Optional |
+| Aktualisierungsintervall | 10–300 Sekunden (Standard: 30) |
 
 ## Voraussetzungen
 
