@@ -73,7 +73,10 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
 
     async def _update_go2rtc(self, stream_url: str) -> None:
         """Meldet den aktuellen Kanal-Stream bei go2rtc an (REST-API)."""
-        src = f"ffmpeg:{stream_url}"
+        # -f mpegts: Input-Format explizit angeben (verhindert SPS/PPS-Fehler beim Stream-Start)
+        # #video=copy: H.264 durchreichen ohne Re-Encoding
+        # #audio=opus: Audio zu Opus konvertieren (WebRTC-Anforderung)
+        src = f"ffmpeg:-f mpegts -i {stream_url}#video=copy#audio=opus"
         api_url = f"{GO2RTC_API}?name={self.go2rtc_name}&src={quote(src, safe='')}"
         session = async_get_clientsession(self.hass)
         try:
