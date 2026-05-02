@@ -62,21 +62,18 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
         self.last_poll_time = datetime.now(timezone.utc)
         data = self._parse(raw)
 
-        # go2rtc Stream aktualisieren wenn Kanal gewechselt hat
-        new_ref    = data.get("currservice_serviceref", "")
+        # go2rtc Stream bei jedem Poll aktualisieren (idempotent, sichert Reregistrierung nach go2rtc-Neustart)
         stream_url = data.get("stream_url")
-        if stream_url and new_ref and new_ref != self._last_serviceref:
-            self._last_serviceref = new_ref
+        if stream_url and not data.get("in_standby"):
             await self._update_go2rtc(stream_url)
 
         return data
 
     async def _update_go2rtc(self, stream_url: str) -> None:
         """Meldet den aktuellen Kanal-Stream bei go2rtc an (REST-API)."""
-        # -f mpegts: Input-Format explizit angeben (verhindert SPS/PPS-Fehler beim Stream-Start)
-        # #video=copy: H.264 durchreichen ohne Re-Encoding
-        # #audio=opus: Audio zu Opus konvertieren (WebRTC-Anforderung)
-        src = f"ffmpeg:-f mpegts -i {stream_url}#video=copy#audio=opus"
+        # #video=h264: Re-Encoding (robuster als copy, handelt fehlende IDR-Keyframes)
+        # #audio=opus: Audio zu Opus konvertieren (WebRTC-Pflicht)
+        src = f"ffmpeg:{stream_url}#video=h264#audio=opus"
         api_url = f"{GO2RTC_API}?name={self.go2rtc_name}&src={quote(src, safe='')}"
         session = async_get_clientsession(self.hass)
         try:
