@@ -328,4 +328,8 @@ class Enigma2DescriptionSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data or data.get("in_standby"):
             return None
-        return data.get("currservice_fulldescription") or "–"
+        desc = data.get("currservice_fulldescription") or ""
+        if not desc:
+            return "–"
+        # HA-Sensor-State: max 255 Zeichen
+        return desc[:255] if len(desc) <= 255 else desc[:252] + "…"
