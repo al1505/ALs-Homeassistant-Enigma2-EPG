@@ -1,6 +1,8 @@
 """Enigma2 EPG Sensor-Entities."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -51,6 +53,8 @@ async def async_setup_entry(
         Enigma2ProgrammeSensor(coordinator, entry),
         Enigma2StartTimeSensor(coordinator, entry),
         Enigma2EndTimeSensor(coordinator, entry),
+        Enigma2RemainingTimeSensor(coordinator, entry),
+        Enigma2DescriptionSensor(coordinator, entry),
         Enigma2VolumeSensor(coordinator, entry),
         Enigma2LastUpdateSensor(coordinator, entry),
         Enigma2IPSensor(coordinator, entry),
@@ -219,12 +223,11 @@ class Enigma2IPSensor(CoordinatorEntity, SensorEntity):
 
 
 class Enigma2GrabURLSensor(CoordinatorEntity, SensorEntity):
-    """Grab-URL fuer TV-Screenshot (diagnostisch)."""
+    """Grab-URL fuer TV-Screenshot."""
 
     _attr_icon = "mdi:camera"
     _attr_has_entity_name = True
     _attr_name = "Grab URL"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -263,7 +266,6 @@ class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
     _attr_icon = "mdi:play-network"
     _attr_has_entity_name = True
     _attr_name = "Stream URL"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -276,3 +278,54 @@ class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
         return data.get("m3u_url")
+
+
+class Enigma2RemainingTimeSensor(CoordinatorEntity, SensorEntity):
+    """Verbleibende Zeit bis Sendungsende (H:MM)."""
+
+    _attr_icon = "mdi:timer-outline"
+    _attr_has_entity_name = True
+    _attr_name = "Remaining Time"
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_remaining_time"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        data = self.coordinator.data
+        if not data or data.get("in_standby"):
+            return None
+        end_ts = data.get("currservice_end_timestamp")
+        if not end_ts:
+            return None
+        try:
+            remaining = int(end_ts) - int(datetime.now(timezone.utc).timestamp())
+            if remaining <= 0:
+                return "0:00"
+            h = remaining // 3600
+            m = (remaining % 3600) // 60
+            return f"{h}:{m:02d}"
+        except (ValueError, TypeError):
+            return None
+
+
+class Enigma2DescriptionSensor(CoordinatorEntity, SensorEntity):
+    """Beschreibung der aktuellen Sendung."""
+
+    _attr_icon = "mdi:text-long"
+    _attr_has_entity_name = True
+    _attr_name = "Description"
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_description"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        data = self.coordinator.data
+        if not data or data.get("in_standby"):
+            return None
+        return data.get("currservice_fulldescription") or None
