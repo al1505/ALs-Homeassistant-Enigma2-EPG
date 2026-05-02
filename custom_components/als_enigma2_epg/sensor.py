@@ -328,4 +328,4 @@ class Enigma2DescriptionSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data or data.get("in_standby"):
             return None
-        return data.get("currservice_fulldescription") or None
+        return data.get("currservice_fulldescription") or "–"

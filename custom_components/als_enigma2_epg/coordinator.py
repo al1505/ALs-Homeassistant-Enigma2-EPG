@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 _LOGGER = logging.getLogger(__name__)
 
 STATUSINFO_PATH = "/api/statusinfo"
+GO2RTC_API      = "http://127.0.0.1:1984/api/streams"
 
 
 class Enigma2EPGCoordinator(DataUpdateCoordinator):
@@ -27,6 +28,8 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
         scheme = "https" if self._ssl else "http"
         self.base_url = f"{scheme}://{self._host}:{self._port}"
         self.last_poll_time: datetime | None = None
+        self._last_serviceref: str = ""
+        self.go2rtc_name = "enigma2_" + self._host.replace(".", "_").replace(":", "_")
 
         super().__init__(
             hass,
@@ -57,7 +60,28 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(f"Verbindungsfehler: {err}") from err
 
         self.last_poll_time = datetime.now(timezone.utc)
-        return self._parse(raw)
+        data = self._parse(raw)
+
+        # go2rtc Stream aktualisieren wenn Kanal gewechselt hat
+        new_ref    = data.get("currservice_serviceref", "")
+        stream_url = data.get("stream_url")
+        if stream_url and new_ref and new_ref != self._last_serviceref:
+            self._last_serviceref = new_ref
+            await self._update_go2rtc(stream_url)
+
+        return data
+
+    async def _update_go2rtc(self, stream_url: str) -> None:
+        """Meldet den aktuellen Kanal-Stream bei go2rtc an (REST-API)."""
+        src = f"ffmpeg:{stream_url}"
+        api_url = f"{GO2RTC_API}?name={self.go2rtc_name}&src={quote(src, safe='')}"
+        session = async_get_clientsession(self.hass)
+        try:
+            async with asyncio.timeout(5):
+                await session.put(api_url)
+            _LOGGER.debug("go2rtc Stream aktualisiert: %s → %s", self.go2rtc_name, stream_url)
+        except Exception as err:
+            _LOGGER.debug("go2rtc Update fehlgeschlagen: %s", err)
 
     def _parse(self, raw: dict) -> dict:
         """Normalisiert die OpenWebIF-Antwort und ergaenzt abgeleitete Felder."""
@@ -74,6 +98,7 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
             "currservice_end_timestamp":   raw.get("currservice_end_timestamp"),
             "in_standby":    self._to_bool(raw.get("inStandby", False)),
             "is_recording":  self._to_bool(raw.get("isRecording", False)),
+            "is_streaming":  self._to_bool(raw.get("isStreaming", False)),
             "volume_level":  self._norm_volume(raw.get("volume")),
             "is_volume_muted": self._to_bool(raw.get("muted", False)),
             "enigma2_url": self.base_url,
