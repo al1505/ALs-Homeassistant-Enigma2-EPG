@@ -13,7 +13,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 _LOGGER = logging.getLogger(__name__)
 
 STATUSINFO_PATH = "/api/statusinfo"
-GO2RTC_API      = "http://127.0.0.1:1984/api/streams"
 
 
 class Enigma2EPGCoordinator(DataUpdateCoordinator):
@@ -28,8 +27,6 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
         scheme = "https" if self._ssl else "http"
         self.base_url = f"{scheme}://{self._host}:{self._port}"
         self.last_poll_time: datetime | None = None
-        self._last_serviceref: str = ""
-        self.go2rtc_name = "enigma2_" + self._host.replace(".", "_").replace(":", "_")
 
         super().__init__(
             hass,
@@ -60,30 +57,7 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(f"Verbindungsfehler: {err}") from err
 
         self.last_poll_time = datetime.now(timezone.utc)
-        data = self._parse(raw)
-
-        # go2rtc Stream nur bei Kanalwechsel aktualisieren (YAML-Eintraege nicht ueberschreiben)
-        new_ref    = data.get("currservice_serviceref", "")
-        stream_url = data.get("stream_url")
-        if stream_url and not data.get("in_standby") and new_ref != self._last_serviceref:
-            self._last_serviceref = new_ref
-            await self._update_go2rtc(stream_url)
-
-        return data
-
-    async def _update_go2rtc(self, stream_url: str) -> None:
-        """Meldet den aktuellen Kanal-Stream bei go2rtc an (REST-API)."""
-        # #video=h264: Re-Encoding (robuster als copy, handelt fehlende IDR-Keyframes)
-        # #audio=opus: Audio zu Opus konvertieren (WebRTC-Pflicht)
-        src = f"ffmpeg:{stream_url}#video=h264#audio=opus"
-        api_url = f"{GO2RTC_API}?name={self.go2rtc_name}&src={quote(src, safe='')}"
-        session = async_get_clientsession(self.hass)
-        try:
-            async with asyncio.timeout(5):
-                await session.put(api_url)
-            _LOGGER.debug("go2rtc Stream aktualisiert: %s → %s", self.go2rtc_name, stream_url)
-        except Exception as err:
-            _LOGGER.debug("go2rtc Update fehlgeschlagen: %s", err)
+        return self._parse(raw)
 
     def _parse(self, raw: dict) -> dict:
         """Normalisiert die OpenWebIF-Antwort und ergaenzt abgeleitete Felder."""

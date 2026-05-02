@@ -35,19 +35,27 @@ class Enigma2Camera(CoordinatorEntity, Camera):
         data = self.coordinator.data
         return bool(data.get("is_recording")) if data else False
 
+    @property
+    def frame_interval(self) -> float:
+        """Intervall zwischen MJPEG-Frames in Sekunden.
+        HA verwendet diesen Wert fuer den MJPEG-Proxy-Stream
+        (/api/camera_proxy_stream). Kleiner Wert = fluessigereres Bild.
+        Limitiert wird das durch die Antwortzeit des Receivers (~500ms).
+        """
+        return 0.5
+
     async def stream_source(self) -> str | None:
+        """Direkter MPEG-TS-Stream vom Enigma2-Receiver (Port 8001).
+        HA zeigt bei diesem Stream einzelne Frames (MJPEG-Fallback)
+        wenn kein vollstaendiger Video-Decoder verfuegbar ist.
+        """
         data = self.coordinator.data
         if not data or data.get("in_standby"):
             return None
-        # go2rtc RTSP-URL zurueckgeben – NICHT die rohe http://host:8001/... URL.
-        # Grund: HA's interner Stream-Prozessor kann MPEG-TS ohne saubere Keyframes
-        # nicht zuverlaessig per WebRTC/HLS an den Browser liefern.
-        # go2rtc wurde bereits via REST-API mit dem aktuellen Kanal-Stream befuellt
-        # (Coordinator._update_go2rtc) und transkodiert ihn per FFmpeg zu
-        # H.264-Baseline + Opus (WebRTC-kompatibel).
-        return f"rtsp://127.0.0.1:8554/{self.coordinator.go2rtc_name}"
+        return data.get("stream_url")
 
     async def async_camera_image(self, width=None, height=None):
+        """Gibt das aktuelle TV-Bild als JPEG zurueck (via /grab-Endpoint)."""
         data = self.coordinator.data
         if not data or data.get("in_standby"):
             return None
