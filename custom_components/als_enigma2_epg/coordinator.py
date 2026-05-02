@@ -72,14 +72,23 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
             "currservice_end":             raw.get("currservice_end", ""),
             "currservice_begin_timestamp": raw.get("currservice_begin_timestamp"),
             "currservice_end_timestamp":   raw.get("currservice_end_timestamp"),
-            "in_standby":    bool(raw.get("inStandby", False)),
-            "is_recording":  bool(raw.get("isRecording", False)),
+            "in_standby":    self._to_bool(raw.get("inStandby", False)),
+            "is_recording":  self._to_bool(raw.get("isRecording", False)),
             "volume_level":  self._norm_volume(raw.get("volume")),
-            "is_volume_muted": bool(raw.get("muted", False)),
+            "is_volume_muted": self._to_bool(raw.get("muted", False)),
             "enigma2_url": self.base_url,
             "grab_url":    self.base_url + "/grab?format=jpg&r=480&mode=video",
             "picon_url":   (self.base_url + "/picon/" + quote(station) + ".png") if station else None,
         }
+
+    @staticmethod
+    def _to_bool(val) -> bool:
+        """OpenWebIF liefert booleans manchmal als String 'true'/'false'."""
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, str):
+            return val.lower() not in ("false", "0", "")
+        return bool(val)
 
     @staticmethod
     def _norm_volume(raw_vol) -> float | None:
