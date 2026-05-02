@@ -27,6 +27,8 @@ _ATTR_WHITELIST = {
     "enigma2_url",
     "grab_url",
     "picon_url",
+    "m3u_url",
+    "stream_url",
 }
 
 
@@ -54,6 +56,7 @@ async def async_setup_entry(
         Enigma2IPSensor(coordinator, entry),
         Enigma2GrabURLSensor(coordinator, entry),
         Enigma2PiconURLSensor(coordinator, entry),
+        Enigma2StreamURLSensor(coordinator, entry),
     ])
 
 
@@ -199,12 +202,11 @@ class Enigma2LastUpdateSensor(CoordinatorEntity, SensorEntity):
 
 
 class Enigma2IPSensor(CoordinatorEntity, SensorEntity):
-    """IP-Adresse des Receivers (diagnostisch)."""
+    """IP-Adresse des Receivers."""
 
     _attr_icon = "mdi:ip-network"
     _attr_has_entity_name = True
     _attr_name = "IP Address"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -236,12 +238,11 @@ class Enigma2GrabURLSensor(CoordinatorEntity, SensorEntity):
 
 
 class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
-    """Picon-URL des aktuellen Kanals (diagnostisch)."""
+    """Picon-URL des aktuellen Kanals."""
 
     _attr_icon = "mdi:image"
     _attr_has_entity_name = True
     _attr_name = "Picon URL"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -254,3 +255,24 @@ class Enigma2PiconURLSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
         return data.get("picon_url")
+
+
+class Enigma2StreamURLSensor(CoordinatorEntity, SensorEntity):
+    """M3U Stream-URL des aktuellen Kanals (fuer VLC / externe Player)."""
+
+    _attr_icon = "mdi:play-network"
+    _attr_has_entity_name = True
+    _attr_name = "Stream URL"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_stream_url"
+        self._attr_device_info = _device_info(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        data = self.coordinator.data
+        if not data:
+            return None
+        return data.get("m3u_url")

@@ -2,7 +2,7 @@
 from __future__ import annotations
 import asyncio
 import logging
-from homeassistant.components.camera import Camera
+from homeassistant.components.camera import Camera, CameraEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -22,6 +22,7 @@ class Enigma2Camera(CoordinatorEntity, Camera):
     _attr_has_entity_name = True
     _attr_name = "TV"
     _attr_icon = "mdi:television-play"
+    _attr_supported_features = CameraEntityFeature.STREAM
 
     def __init__(self, coordinator, entry):
         CoordinatorEntity.__init__(self, coordinator)
@@ -33,6 +34,12 @@ class Enigma2Camera(CoordinatorEntity, Camera):
     def is_recording(self):
         data = self.coordinator.data
         return bool(data.get("is_recording")) if data else False
+
+    async def stream_source(self) -> str | None:
+        data = self.coordinator.data
+        if not data or data.get("in_standby"):
+            return None
+        return data.get("stream_url")
 
     async def async_camera_image(self, width=None, height=None):
         data = self.coordinator.data

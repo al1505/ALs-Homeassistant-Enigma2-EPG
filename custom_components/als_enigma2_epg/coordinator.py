@@ -79,6 +79,10 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
             "enigma2_url": self.base_url,
             "grab_url":    self.base_url + "/grab?format=jpg&r=480&mode=video",
             "picon_url":   (self.base_url + "/picon/" + quote(station) + ".png") if station else None,
+            "m3u_url":     (self.base_url + "/web/stream.m3u?ref=" + quote(raw.get("currservice_serviceref", "")))
+                           if raw.get("currservice_serviceref") else None,
+            "stream_url":  (f"http://{self._host}:8001/" + raw.get("currservice_serviceref", ""))
+                           if raw.get("currservice_serviceref") else None,
         }
 
     @staticmethod
