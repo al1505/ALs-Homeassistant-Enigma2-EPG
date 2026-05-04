@@ -11,10 +11,12 @@
           "ssl": "HTTPS verwenden",
           "username": "Benutzername (optional)",
           "password": "Passwort (optional)",
-          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+          "scan_interval": "Aktualisierungsintervall (Sekunden)",
+          "grab_interval_ms": "Bild-Aktualisierungsintervall (ms, min. 100)"
         },
         "data_description": {
-          "alias": "Optionaler Anzeigename für diese Integration (erscheint als Gerätename)"
+          "alias": "Optionaler Anzeigename für diese Integration (erscheint als Gerätename)",
+          "grab_interval_ms": "Wie oft das TV-Bild (Camera & Player) aktualisiert wird. Realistisches Minimum je nach Receiver: 300–500 ms."
         }
       }
     },
@@ -33,7 +35,11 @@
         "title": "Einstellungen anpassen",
         "data": {
           "alias": "Name (z.B. 'VU+ Office')",
-          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+          "scan_interval": "Aktualisierungsintervall (Sekunden)",
+          "grab_interval_ms": "Bild-Aktualisierungsintervall (ms, min. 100)"
+        },
+        "data_description": {
+          "grab_interval_ms": "Wie oft das TV-Bild (Camera & Player) aktualisiert wird. Realistisches Minimum je nach Receiver: 300–500 ms."
         }
       }
     }

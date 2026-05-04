@@ -1,7 +1,9 @@
-"""Enigma2 EPG Media Player – zeigt EPG-Info und TV-Bild, Lautstärke-Steuerung."""
+"""Enigma2 EPG Media Player – Steuerung + Pseudo-Live-Bild via Grab-Loop."""
 from __future__ import annotations
+
 import asyncio
 import logging
+
 from homeassistant.components.media_player import (
     MediaPlayerEntity,
     MediaPlayerEntityFeature,
@@ -13,15 +15,22 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
 from . import DOMAIN
 from .coordinator import Enigma2EPGCoordinator
 from .sensor import _device_info
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass, entry, async_add_entities):
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([Enigma2MediaPlayer(coordinator, entry)])
+
 
 class Enigma2MediaPlayer(CoordinatorEntity, MediaPlayerEntity):
     _attr_has_entity_name = True
@@ -33,13 +42,31 @@ class Enigma2MediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         | MediaPlayerEntityFeature.VOLUME_STEP
     )
 
-    def __init__(self, coordinator, entry):
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_mediaplayer"
         self._attr_device_info = _device_info(entry)
 
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.coordinator.add_grab_listener(self._on_grab_update)
+
+    def _on_grab_update(self) -> None:
+        """Wird vom Grab-Loop aufgerufen – triggert State-Update damit das Frontend das neue Bild holt."""
+        self.async_write_ha_state()
+
     @property
-    def state(self):
+    def media_image_hash(self) -> str:
+        return self.coordinator.last_grab_hash
+
+    async def async_get_media_image(self) -> tuple[bytes | None, str | None]:
+        image = self.coordinator.last_grab_bytes
+        if image:
+            return (image, "image/jpeg")
+        return (None, None)
+
+    @property
+    def state(self) -> MediaPlayerState:
         data = self.coordinator.data
         if not data:
             return MediaPlayerState.OFF
@@ -48,43 +75,31 @@ class Enigma2MediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         return MediaPlayerState.PLAYING
 
     @property
-    def media_title(self):
+    def media_title(self) -> str | None:
         data = self.coordinator.data
         return data.get("currservice_name") if data else None
 
     @property
-    def media_channel(self):
+    def media_channel(self) -> str | None:
         data = self.coordinator.data
         return data.get("currservice_station") if data else None
 
     @property
-    def media_series_title(self):
+    def media_series_title(self) -> str | None:
         return self.media_channel
 
     @property
-    def media_image_url(self):
-        # HA proxied → kein CORS
-        data = self.coordinator.data
-        if not data or data.get("in_standby"):
-            return None
-        return data.get("grab_url")
-
-    @property
-    def media_image_remotely_accessible(self) -> bool:
-        return False
-
-    @property
-    def volume_level(self):
+    def volume_level(self) -> float | None:
         data = self.coordinator.data
         return data.get("volume_level") if data else None
 
     @property
-    def is_volume_muted(self):
+    def is_volume_muted(self) -> bool | None:
         data = self.coordinator.data
         return bool(data.get("is_volume_muted")) if data else None
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         data = self.coordinator.data
         if not data:
             return {}
