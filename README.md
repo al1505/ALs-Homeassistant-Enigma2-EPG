@@ -8,7 +8,7 @@
 [![HACS hinzufuegen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=al1505&repository=als-enigma2-epg&category=integration)
 
 > Home Assistant Custom Integration fuer Enigma2/OpenWebIF Receiver (VU+, Dreambox, u.a.).
-> Liefert EPG-Daten, Pseudo-Live-TV-Bild, Lautstaerke-Steuerung und mehr — optimal kombiniert mit der [ALs Harmony Companion Card](https://github.com/al1505/ALs-Homeassistant-Harmony-Companion-Card).
+> Liefert EPG-Daten, Senderlogo (Picon), Lautstaerke-Steuerung und mehr — optimal kombiniert mit der [ALs Harmony Companion Card](https://github.com/al1505/ALs-Homeassistant-Harmony-Companion-Card).
 
 ---
 
@@ -26,10 +26,10 @@ Direkt-Link: **[paypal.me/al1505](https://paypal.me/al1505)** ❤️
 
 - Aktueller Kanal, Sendungsname, Start- und Endzeit, verbleibende Zeit
 - EPG-Beschreibung der laufenden Sendung
-- **Pseudo-Live-TV-Bild** fuer Camera-Entity und Media-Player (konfigurierbare Refresh-Rate)
-- Lautstaerke-Steuerung, Mute, Standby- und Aufnahme-Status
+- **Picon (Senderlogo)** als natives HA Image-Entity — aktualisiert sich automatisch bei Kanalwechsel
 - Picon-URL und Grab-URL fuer die ALs Harmony Companion Card
-- Konfigurierbarer Alias-Name, Abruf- und Bild-Aktualisierungsintervall
+- Lautstaerke, Mute, Standby- und Aufnahme-Status
+- Konfigurierbarer Alias-Name und Abrufintervall
 - Refresh-Button und Diagnostics (letzter Abruf)
 
 ## Installation via HACS
@@ -52,15 +52,10 @@ Auf den Badge oben klicken – oder manuell:
 | Alias | Optionaler Anzeigename |
 | Benutzername / Passwort | Optional |
 | Aktualisierungsintervall | 10–300 Sekunden (Standard: 30) |
-| Bild-Aktualisierungsintervall | 100–5000 ms (Standard: 500 ms) |
 
 ### Einstellungen nachtraeglich aendern
 
 **Einstellungen → Geraete & Dienste → ALs Homeassistant Enigma2 EPG → Drei-Punkte-Menü → Konfigurieren**
-
-Dort koennen Alias, Aktualisierungsintervall und Bild-Aktualisierungsintervall angepasst werden.
-
-> **Hinweis Bild-Aktualisierungsintervall:** Der `/grab`-Endpoint des Receivers braucht je nach Modell 200–600 ms zum Rendern. Bei sehr niedrigen Werten (< 300 ms) wird die effektive Framerate durch den Receiver limitiert. Empfehlung: mit 500 ms starten, dann nach Bedarf reduzieren.
 
 ## Entities
 
@@ -80,8 +75,7 @@ Dort koennen Alias, Aktualisierungsintervall und Bild-Aktualisierungsintervall a
 | Standby | Binary Sensor | Receiver im Standby |
 | Recording | Binary Sensor | Aufnahme laeuft |
 | Muted | Binary Sensor | Ton stummgeschaltet |
-| TV | Camera | Pseudo-Live-TV-Bild (MJPEG via Grab-URL) |
-| Player | Media Player | Lautstaerke-Steuerung + Cover-Art + EPG-Beschreibung |
+| Picon | Image | Senderlogo – aktualisiert sich bei Kanalwechsel |
 | Refresh EPG | Button (Configuration) | Sofortiger manueller Datenabruf |
 
 ## Voraussetzungen

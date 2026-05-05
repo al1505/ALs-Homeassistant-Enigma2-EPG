@@ -21,7 +21,6 @@ STEP_USER_SCHEMA = vol.Schema(
         vol.Optional("username", default=""): str,
         vol.Optional("password", default=""): str,
         vol.Optional("scan_interval", default=30): vol.All(int, vol.Range(min=10, max=300)),
-        vol.Optional("grab_interval_ms", default=500): vol.All(int, vol.Range(min=100, max=5000)),
     }
 )
 
@@ -97,7 +96,6 @@ class Enigma2EPGOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input: dict | None = None):
         if user_input is not None:
-            # Titel des Eintrags aktualisieren wenn Alias geaendert wurde
             new_title = _entry_title({**self._entry.data, **user_input})
             self.hass.config_entries.async_update_entry(
                 self._entry, title=new_title
@@ -116,12 +114,6 @@ class Enigma2EPGOptionsFlow(config_entries.OptionsFlow):
                         "scan_interval", self._entry.data.get("scan_interval", 30)
                     ),
                 ): vol.All(int, vol.Range(min=10, max=300)),
-                vol.Optional(
-                    "grab_interval_ms",
-                    default=self._entry.options.get(
-                        "grab_interval_ms", self._entry.data.get("grab_interval_ms", 500)
-                    ),
-                ): vol.All(int, vol.Range(min=100, max=5000)),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Callable
 from urllib.parse import quote
 
 from homeassistant.core import HomeAssistant
@@ -29,63 +28,12 @@ class Enigma2EPGCoordinator(DataUpdateCoordinator):
         self.base_url = f"{scheme}://{self._host}:{self._port}"
         self.last_poll_time: datetime | None = None
 
-        self._grab_interval_ms: int = max(100, int(config.get("grab_interval_ms", 500)))
-        self.last_grab_bytes: bytes | None = None
-        self.last_grab_hash: str = "0"
-        self._grab_counter: int = 0
-        self._grab_listeners: list[Callable[[], None]] = []
-        self._grab_task: asyncio.Task | None = None
-
         super().__init__(
             hass,
             _LOGGER,
             name=f"Enigma2 EPG {self._host}",
             update_interval=timedelta(seconds=int(config.get("scan_interval", 30))),
         )
-
-    def start_grab_loop(self, hass: HomeAssistant) -> None:
-        """Startet den Hintergrund-Task fuer periodische Grab-Bilder."""
-        self._grab_task = hass.async_create_background_task(
-            self._grab_loop(), name=f"enigma2_grab_{self._host}"
-        )
-
-    def stop_grab_loop(self) -> None:
-        """Beendet den Grab-Loop sauber."""
-        if self._grab_task and not self._grab_task.done():
-            self._grab_task.cancel()
-
-    def add_grab_listener(self, callback: Callable[[], None]) -> None:
-        """Registriert Callback, der bei jedem neuen Grab-Frame aufgerufen wird."""
-        self._grab_listeners.append(callback)
-
-    async def _grab_loop(self) -> None:
-        """Holt Grab-Bilder im konfigurierten Intervall und benachrichtigt Listener."""
-        grab_url = self.base_url + "/grab?format=jpg&r=480&mode=video"
-        auth = None
-        if self._username:
-            from aiohttp import BasicAuth
-            auth = BasicAuth(self._username, self._password)
-
-        while True:
-            if not (self.data and self.data.get("in_standby")):
-                try:
-                    session = async_get_clientsession(self.hass)
-                    async with asyncio.timeout(5.0):
-                        async with session.get(grab_url, auth=auth, ssl=self._ssl) as resp:
-                            if resp.status == 200:
-                                self.last_grab_bytes = await resp.read()
-                                self._grab_counter += 1
-                                self.last_grab_hash = str(self._grab_counter)
-                                for cb in self._grab_listeners:
-                                    cb()
-                except asyncio.CancelledError:
-                    return
-                except Exception as err:
-                    _LOGGER.debug("Grab-Loop Fehler: %s", err)
-            try:
-                await asyncio.sleep(self._grab_interval_ms / 1000.0)
-            except asyncio.CancelledError:
-                return
 
     async def _async_update_data(self) -> dict:
         """Ruft /api/statusinfo ab und gibt die geparsten Daten zurueck."""

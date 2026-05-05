@@ -7,11 +7,11 @@ from homeassistant.core import HomeAssistant
 from .coordinator import Enigma2EPGCoordinator
 
 DOMAIN = "als_enigma2_epg"
-PLATFORMS = ["sensor", "binary_sensor", "button", "camera", "media_player"]
+PLATFORMS = ["sensor", "binary_sensor", "button", "image"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Integration einrichten: Coordinator starten, Plattformen laden, Grab-Loop starten."""
+    """Integration einrichten: Coordinator starten, Plattformen laden."""
     config = {**entry.data, **entry.options}
     coordinator = Enigma2EPGCoordinator(hass, config)
     await coordinator.async_config_entry_first_refresh()
@@ -19,14 +19,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    coordinator.start_grab_loop(hass)
-    entry.async_on_unload(coordinator.stop_grab_loop)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Coordinator bei Options-Aenderung neu starten (z.B. scan_interval, grab_interval_ms)."""
+    """Coordinator bei Options-Aenderung neu starten (z.B. scan_interval)."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
