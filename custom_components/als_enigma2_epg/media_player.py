@@ -1,4 +1,4 @@
-"""Enigma2 EPG Media Player – Steuerung + Pseudo-Live-Bild via Grab-Loop."""
+"""Enigma2 EPG Media Player – Steuerung + Bild via Grab-Cache."""
 from __future__ import annotations
 
 import asyncio
@@ -47,16 +47,9 @@ class Enigma2MediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         self._attr_unique_id = f"{entry.entry_id}_mediaplayer"
         self._attr_device_info = _device_info(entry)
 
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        self.coordinator.add_grab_listener(self._on_grab_update)
-
-    def _on_grab_update(self) -> None:
-        """Wird vom Grab-Loop aufgerufen – triggert State-Update damit das Frontend das neue Bild holt."""
-        self.async_write_ha_state()
-
     @property
     def media_image_hash(self) -> str:
+        # Aendert sich beim Coordinator-Poll (30s) – kein Rapid-Refresh um state_changed-Spam zu vermeiden
         return self.coordinator.last_grab_hash
 
     async def async_get_media_image(self) -> tuple[bytes | None, str | None]:
@@ -87,6 +80,14 @@ class Enigma2MediaPlayer(CoordinatorEntity, MediaPlayerEntity):
     @property
     def media_series_title(self) -> str | None:
         return self.media_channel
+
+    @property
+    def media_artist(self) -> str | None:
+        """EPG-Beschreibung als sichtbare Textzeile im Media-Player-Card."""
+        data = self.coordinator.data
+        if not data or data.get("in_standby"):
+            return None
+        return data.get("currservice_fulldescription") or None
 
     @property
     def volume_level(self) -> float | None:
