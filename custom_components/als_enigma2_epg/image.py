@@ -36,7 +36,7 @@ class Enigma2PiconImage(CoordinatorEntity, ImageEntity):
 
     def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
         CoordinatorEntity.__init__(self, coordinator)
-        ImageEntity.__init__(self)
+        ImageEntity.__init__(self, coordinator.hass)
         self._attr_unique_id = f"{entry.entry_id}_picon"
         self._attr_device_info = _device_info(entry)
         self._attr_image_last_updated = datetime.now(timezone.utc)
