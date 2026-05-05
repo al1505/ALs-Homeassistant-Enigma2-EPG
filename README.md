@@ -76,6 +76,7 @@ Auf den Badge oben klicken – oder manuell:
 | Recording | Binary Sensor | Aufnahme laeuft |
 | Muted | Binary Sensor | Ton stummgeschaltet |
 | Picon | Image | Senderlogo – aktualisiert sich bei Kanalwechsel |
+| Grab | Image | TV-Screenshot – aktualisiert sich im Abrufintervall |
 | Refresh EPG | Button (Configuration) | Sofortiger manueller Datenabruf |
 
 ## Voraussetzungen

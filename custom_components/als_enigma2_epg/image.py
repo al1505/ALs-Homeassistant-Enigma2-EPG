@@ -1,4 +1,4 @@
-"""Enigma2 EPG Image – Picon (Senderlogo) als HA Image-Entity."""
+"""Enigma2 EPG Image – Picon und Grab-Screenshot als HA Image-Entities."""
 from __future__ import annotations
 
 import asyncio
@@ -25,7 +25,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([Enigma2PiconImage(coordinator, entry)])
+    async_add_entities([
+        Enigma2PiconImage(coordinator, entry),
+        Enigma2GrabImage(coordinator, entry),
+    ])
 
 
 class Enigma2PiconImage(CoordinatorEntity, ImageEntity):
@@ -70,4 +73,45 @@ class Enigma2PiconImage(CoordinatorEntity, ImageEntity):
                         return await resp.read()
         except Exception as err:
             _LOGGER.debug("Picon-Abruf fehlgeschlagen: %s", err)
+        return None
+
+
+class Enigma2GrabImage(CoordinatorEntity, ImageEntity):
+    _attr_has_entity_name = True
+    _attr_name = "Grab"
+    _attr_icon = "mdi:television-play"
+    _attr_content_type = "image/jpeg"
+
+    def __init__(self, coordinator: Enigma2EPGCoordinator, entry: ConfigEntry) -> None:
+        CoordinatorEntity.__init__(self, coordinator)
+        ImageEntity.__init__(self, coordinator.hass)
+        self._attr_unique_id = f"{entry.entry_id}_grab"
+        self._attr_device_info = _device_info(entry)
+        self._attr_image_last_updated = datetime.now(timezone.utc)
+
+    def _handle_coordinator_update(self) -> None:
+        """Bei jedem Poll image_last_updated setzen damit HA das Bild neu laedt."""
+        if self.coordinator.data and not self.coordinator.data.get("in_standby"):
+            self._attr_image_last_updated = datetime.now(timezone.utc)
+        super()._handle_coordinator_update()
+
+    async def async_image(self) -> bytes | None:
+        data = self.coordinator.data
+        if not data or data.get("in_standby"):
+            return None
+        grab_url = data.get("grab_url")
+        if not grab_url:
+            return None
+        auth = None
+        if self.coordinator._username:
+            from aiohttp import BasicAuth
+            auth = BasicAuth(self.coordinator._username, self.coordinator._password)
+        session = async_get_clientsession(self.hass)
+        try:
+            async with asyncio.timeout(10):
+                async with session.get(grab_url, auth=auth, ssl=self.coordinator._ssl) as resp:
+                    if resp.status == 200:
+                        return await resp.read()
+        except Exception as err:
+            _LOGGER.debug("Grab-Abruf fehlgeschlagen: %s", err)
         return None
