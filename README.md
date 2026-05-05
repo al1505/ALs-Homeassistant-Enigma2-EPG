@@ -8,7 +8,7 @@
 [![HACS hinzufuegen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=al1505&repository=als-enigma2-epg&category=integration)
 
 > Home Assistant Custom Integration fuer Enigma2/OpenWebIF Receiver (VU+, Dreambox, u.a.).
-> Liefert EPG-Daten, Senderlogo (Picon), Lautstaerke-Steuerung und mehr — optimal kombiniert mit der [ALs Harmony Companion Card](https://github.com/al1505/ALs-Homeassistant-Harmony-Companion-Card).
+> Liefert EPG-Daten, Senderlogo (Picon), Lautstaerke-Anzeige und mehr — optimal kombiniert mit der [ALs Harmony Companion Card](https://github.com/al1505/ALs-Homeassistant-Harmony-Companion-Card).
 
 ---
 
@@ -28,7 +28,7 @@ Direkt-Link: **[paypal.me/al1505](https://paypal.me/al1505)** ❤️
 - EPG-Beschreibung der laufenden Sendung
 - **Picon (Senderlogo)** als natives HA Image-Entity — aktualisiert sich automatisch bei Kanalwechsel
 - Picon-URL und Grab-URL fuer die ALs Harmony Companion Card
-- Lautstaerke, Mute, Standby- und Aufnahme-Status
+- Lautstaerke-Anzeige (%), Mute-, Standby- und Aufnahme-Status (read-only Sensoren)
 - Konfigurierbarer Alias-Name und Abrufintervall
 - Refresh-Button und Diagnostics (letzter Abruf)
 
