@@ -1,7 +1,7 @@
 # HA Project Conventions v1.0 — Home-Assistant-Hausstil
 
 > Last updated: 2026-06-03
-> Status: **Geseedet aus der kanonischen HA-Baseline** (`H:\ALs-CustomDev\04-design\ha-project-conventions.md`)
+> Status: **Geseedet aus der kanonischen HA-Baseline** (`H:\CustomDev\ALs-CustomDev\04-design\ha-project-conventions.md`)
 >
 > **Projekttyp:** HA **Custom Integration** (Python, `custom_components/als_enigma2_epg`) — kein Lovelace-Card. Die Card-spezifischen Abschnitte (§1 Custom Properties, §2 Card-Font, §5.1, §7 Card-Container, §8) gelten sinngemäß für die Card-Konsumenten dieser Integration (z.B. die Harmony Companion Card). **Für dieses Repo maßgeblich:** §3 Logo/Icons (Brand-PNGs), §4 Icons (`icons.json`/MDI), §5.2 Config-Flow, §6 Voice & Tone (inkl. `strings.json`), §9 HACS/Release.
 
