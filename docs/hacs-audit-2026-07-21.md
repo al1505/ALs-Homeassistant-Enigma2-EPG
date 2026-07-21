@@ -66,9 +66,15 @@ Kein offener PR gefunden. Falls die Aufnahme in den Default-Store gewünscht ist
 | PR | reviewDecision | isDraft | Nächster Schritt |
 |---|---|---|---|
 | [#7381](https://github.com/hacs/default/pull/7381) Enigma2-EPG | CHANGES_REQUESTED (Label stale, wird bei nächster Review von frenck aktualisiert) | **false** | Erledigt: LICENSE (v1.7.2), Branch-Reset auf aktuellen `hacs/default:master` (war `BEHIND`, mehrere andere Katalogeinträge wurden zwischenzeitlich entfernt), sauberer `+1/-0`-Diff, "Ready for review" gesetzt. Wartet jetzt auf frenck. |
-| [#7382](https://github.com/hacs/default/pull/7382) Energiebilanz-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) — **noch nicht durchgeführt** |
-| [#7383](https://github.com/hacs/default/pull/7383) Harmony-Companion-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) — **noch nicht durchgeführt** |
+| [#7382](https://github.com/hacs/default/pull/7382) Energiebilanz-Card | CHANGES_REQUESTED (Label stale) | **false** | Erledigt: sauberer `+1/-0`-Diff in `plugin` (statt kaputtem Doppel-Datei-Diff), "Ready for review" gesetzt. Wartet auf Review. |
+| [#7383](https://github.com/hacs/default/pull/7383) Harmony-Companion-Card | CHANGES_REQUESTED (Label stale) | **false** | Erledigt: sauberer `+1/-0`-Diff in `plugin` (statt kaputtem Doppel-Datei-Diff), "Ready for review" gesetzt. Wartet auf Review. |
 
 ### Nachtrag: Branch-Update PR #7381 (2026-07-21, nach hacs-bot "branch out of date")
 
 Der Fork-Branch `al1505/default:add-als-enigma2-epg-v2` war `BEHIND` `hacs/default:master` (enthielt zudem noch einen alten Merge-Commit aus der ersten Review-Runde). Fix: neuer Branch direkt von `upstream/master` erstellt, die eine Zeile `"al1505/ALs-Homeassistant-Enigma2-EPG"` an der korrekten sortierten Stelle eingefügt (zwischen `al-one/hass-xiaomi-miot` und `alakdae/AquastillaHA`), verifiziert (`git diff --stat` = exakt `+1/-0`, kein CRLF), und mit `git push --force-with-lease` auf den PR-Branch geschoben. `mergeStateStatus` danach `BLOCKED` (normal, wartet auf Review) statt `BEHIND`. Anschließend `gh pr ready 7381 -R hacs/default` ausgeführt.
+
+### Nachtrag: PRs #7382 + #7383 nach demselben Verfahren repariert (2026-07-21)
+
+Beide PRs hatten den in Befund 1 beschriebenen Doppel-Datei-Diff (`integration` +2266/-2265 UND `plugin` +580/-579). Fix: jeweils neuer Branch von `upstream/master`, nur die eigene Zeile in `plugin` eingefügt — Sortierposition mit `hacs/default`s eigenem `scripts/is_sorted.py` verifiziert (Katalog wird **case-insensitive** sortiert, `sorted(content, key=str.casefold)`, nicht simple ASCII-Sortierung — beide Einträge gehören zwischen `aex351/home-assistant-neerslag-card` und `alex-taylor/energy-distribution-ext`). `integration` wurde in keinem der beiden Branches mehr angefasst. Beide mit `--force-with-lease` gepusht und auf "Ready for review" gesetzt.
+
+**Wichtig fürs nächste Mal:** `hacs/default` sortiert case-insensitive (`str.casefold`), nicht nach roher Byte-Reihenfolge — bei künftigen Katalog-Einträgen immer `scripts/is_sorted.py` im Ziel-Repo konsultieren statt die Position zu erraten.
