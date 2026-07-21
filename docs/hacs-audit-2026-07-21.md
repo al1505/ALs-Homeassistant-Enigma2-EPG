@@ -11,7 +11,7 @@ Von 12 Ordnern unter `H:\Home-Assistant\` erfüllen 4 beide Kriterien (Git-Repo 
 | Projekt | Typ | HACS-Default-PR |
 |---|---|---|
 | ALs-Homeassistant-Enigma2-EPG | Integration | [#7381](https://github.com/hacs/default/pull/7381) |
-| ALs-HA-SundanceMarin | Integration | [#9397](https://github.com/hacs/default/pull/9397) (neu eröffnet 2026-07-21) |
+| ALs-HA-SundanceMarin | Integration | [#9398](https://github.com/hacs/default/pull/9398) (ersetzt #9397, s. Nachtrag) |
 | ALs-Homeassistant-Harmony-Companion-Card | Plugin/Card | [#7383](https://github.com/hacs/default/pull/7383) |
 | ALs-Homeassitant-Energiebilanz-Card | Plugin/Card | [#7382](https://github.com/hacs/default/pull/7382) |
 
@@ -74,7 +74,7 @@ PR [hacs/default#9397](https://github.com/hacs/default/pull/9397) eröffnet (nic
 | [#7381](https://github.com/hacs/default/pull/7381) Enigma2-EPG | CHANGES_REQUESTED (Label stale, wird bei nächster Review von frenck aktualisiert) | **false** | Erledigt: LICENSE (v1.7.2), Branch-Reset auf aktuellen `hacs/default:master` (war `BEHIND`, mehrere andere Katalogeinträge wurden zwischenzeitlich entfernt), sauberer `+1/-0`-Diff, "Ready for review" gesetzt. Wartet jetzt auf frenck. |
 | [#7382](https://github.com/hacs/default/pull/7382) Energiebilanz-Card | CHANGES_REQUESTED (Label stale) | **false** | Erledigt: sauberer `+1/-0`-Diff in `plugin` (statt kaputtem Doppel-Datei-Diff), "Ready for review" gesetzt. Wartet auf Review. |
 | [#7383](https://github.com/hacs/default/pull/7383) Harmony-Companion-Card | CHANGES_REQUESTED (Label stale) | **false** | Erledigt: sauberer `+1/-0`-Diff in `plugin` (statt kaputtem Doppel-Datei-Diff), "Ready for review" gesetzt. Wartet auf Review. |
-| [#9397](https://github.com/hacs/default/pull/9397) SundanceMarin | *(noch keine Review)* | **false** | Neu eröffnet 2026-07-21, sauberer `+1/-0`-Diff in `integration`. Wartet auf ersten Review. |
+| [#9398](https://github.com/hacs/default/pull/9398) SundanceMarin | REVIEW_REQUIRED, keine Review bisher | **false** | Ersetzt #9397 (von hacs-bot auto-geschlossen). Korrekter Checklist-Body mit echten Links (Release v1.5.5, HACS-Action-Run, Hassfest-Run), sauberer `+1/-0`-Diff in `integration`. Wartet auf ersten Review. |
 
 ### Nachtrag: Branch-Update PR #7381 (2026-07-21, nach hacs-bot "branch out of date")
 
@@ -91,6 +91,16 @@ Beide PRs hatten den in Befund 1 beschriebenen Doppel-Datei-Diff (`integration` 
 - **Enigma2-EPG doppelte Icons entfernt** (Befund 3) → Release **v1.7.3**, verifiziert.
 - **SundanceMarin bei hacs/default eingereicht** (Befund 4) → PR [#9397](https://github.com/hacs/default/pull/9397).
 - **Harmony `harmony-card-v2.js`-Distribution (Befund 2): Fix-Versuch fehlgeschlagen, zurückgerollt.** `dist/`-Umstellung (v5.5.3) hat CI (`hacs/action`) gebrochen ("Repository structure ... is not compliant") — die öffentliche HACS-Doku zum `dist/`-Mechanismus war an dieser Stelle nicht ausreichend präzise für den Erfolg. Sofort per `git revert` zurückgerollt (v5.5.4, CI wieder grün, inhaltlich = v5.5.2), kaputter v5.5.3-Release+Tag gelöscht (war nur ~2 Min. "Latest"). **Dieser Punkt bleibt ungelöst** — braucht vor einem erneuten Versuch echtes Quellcode-Studium der `hacs/action`-Validierungslogik, nicht nur Doku-Recherche.
+
+### Nachtrag: PR #9397 von hacs-bot auto-geschlossen — falscher PR-Body, plus versteckter `ignore`-Key in SundanceMarin (2026-07-21)
+
+Kurz nach Eröffnung von #9397 kam eine hacs-bot-Review `CHANGES_REQUESTED`: *"Complete all checklist items before submitting"* + *"Found 0 link(s), but 3 are required for integration repositories."* Ursache: #9397 wurde mit einem selbstgeschriebenen `--body`-Text erstellt statt der offiziellen `hacs/default`-PR-Vorlage (`.github/PULL_REQUEST_TEMPLATE.md` im Ziel-Repo), die eine abgehakte Checkliste **und** drei Pflicht-Links (aktueller Release, erfolgreicher HACS-Action-Run *ohne* `ignore`-Key, erfolgreicher Hassfest-Run) verlangt — die Vorlage selbst warnt: *"Do not open a pull request before you have completed all these, it will be closed."* Genau das ist passiert: `gh pr view 9397` zeigte kurz danach `state: CLOSED`, ohne dass ich das ausgelöst hätte.
+
+Beim Vorbereiten der Links fiel ein zweites, unabhängiges Problem auf: SundanceMarins `.github/workflows/validate.yaml` hatte `ignore: hacsjson integration_manifest` gesetzt — die Vorlage verlangt aber explizit einen Link "ohne den `ignore`-Key". Diese Ignore-Flags haben genau die für die Submission relevanten Checks stillschweigend übersprungen. Fix: `ignore`-Key entfernt, Validate lief danach sauber grün ohne jede Ausnahme (bestätigt manifest.json/hacs.json waren die ganze Zeit schon compliant, der Ignore war unnötig) → **Release v1.5.5**.
+
+`gh pr reopen 9397` wurde von GitHub abgelehnt (API-Fehler). Da hacs-bot selbst "submit a new PR" verlangt, wurde stattdessen **PR [#9398](https://github.com/hacs/default/pull/9398)** vom selben Branch (`add-ha-sundancemarin`) mit dem korrekten Checklist-Body eröffnet (Links: [Release v1.5.5](https://github.com/al1505/ALs-HA-SundanceMarin/releases/tag/v1.5.5), [HACS-Action-Run](https://github.com/al1505/ALs-HA-SundanceMarin/actions/runs/29846403670), [Hassfest-Run](https://github.com/al1505/ALs-HA-SundanceMarin/actions/runs/29846403668)). Verifiziert: `#9398` blieb offen, `reviewDecision: REVIEW_REQUIRED`, keine automatische Ablehnung mehr.
+
+**Wichtig fürs nächste Mal:** Bei `hacs/default`-PRs immer `.github/PULL_REQUEST_TEMPLATE.md` aus dem Ziel-Repo laden und exakt befüllen (`gh pr create --body-file`, nicht `--body` mit eigenem Text) — hacs-bot prüft automatisiert auf Checklisten-Häkchen und genau 3 Links, und schließt non-compliant PRs selbständig, nicht nur mit "changes requested".
 
 ### Nebenbefund: py-launcher/Bash-Interaktion kann Dateien ungefragt auf CRLF umstellen
 
