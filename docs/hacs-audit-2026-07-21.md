@@ -65,6 +65,10 @@ Kein offener PR gefunden. Falls die Aufnahme in den Default-Store gewünscht ist
 
 | PR | reviewDecision | isDraft | Nächster Schritt |
 |---|---|---|---|
-| [#7381](https://github.com/hacs/default/pull/7381) Enigma2-EPG | CHANGES_REQUESTED | true | LICENSE jetzt behoben (v1.7.2) → **"Ready for review" klicken**, s. u. |
-| [#7382](https://github.com/hacs/default/pull/7382) Energiebilanz-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) |
-| [#7383](https://github.com/hacs/default/pull/7383) Harmony-Companion-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) |
+| [#7381](https://github.com/hacs/default/pull/7381) Enigma2-EPG | CHANGES_REQUESTED (Label stale, wird bei nächster Review von frenck aktualisiert) | **false** | Erledigt: LICENSE (v1.7.2), Branch-Reset auf aktuellen `hacs/default:master` (war `BEHIND`, mehrere andere Katalogeinträge wurden zwischenzeitlich entfernt), sauberer `+1/-0`-Diff, "Ready for review" gesetzt. Wartet jetzt auf frenck. |
+| [#7382](https://github.com/hacs/default/pull/7382) Energiebilanz-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) — **noch nicht durchgeführt** |
+| [#7383](https://github.com/hacs/default/pull/7383) Harmony-Companion-Card | CHANGES_REQUESTED | true | Branch-Reset + sauberer Ein-Zeilen-Diff nötig (siehe Befund 1) — **noch nicht durchgeführt** |
+
+### Nachtrag: Branch-Update PR #7381 (2026-07-21, nach hacs-bot "branch out of date")
+
+Der Fork-Branch `al1505/default:add-als-enigma2-epg-v2` war `BEHIND` `hacs/default:master` (enthielt zudem noch einen alten Merge-Commit aus der ersten Review-Runde). Fix: neuer Branch direkt von `upstream/master` erstellt, die eine Zeile `"al1505/ALs-Homeassistant-Enigma2-EPG"` an der korrekten sortierten Stelle eingefügt (zwischen `al-one/hass-xiaomi-miot` und `alakdae/AquastillaHA`), verifiziert (`git diff --stat` = exakt `+1/-0`, kein CRLF), und mit `git push --force-with-lease` auf den PR-Branch geschoben. `mergeStateStatus` danach `BLOCKED` (normal, wartet auf Review) statt `BEHIND`. Anschließend `gh pr ready 7381 -R hacs/default` ausgeführt.
