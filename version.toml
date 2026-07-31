@@ -1,4 +1,4 @@
 # version.toml — Single Source of Truth fuer die Projektversion
 # Format: X.Y.Z   ->   X = Release · Y = Features · Z = Bugfixes
 [project]
-version = "1.7.4"
+version = "1.7.5"
